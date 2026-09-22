@@ -1,0 +1,1204 @@
+/* Diner™ Manager — Bodega/Vendit neon chrome */
+.diner-manager-dialog {
+  --diner-accent: #00fff7;
+  --diner-hover: #ffdd00;
+  --diner-bg: #0b0f10;
+  --diner-panel: #101418;
+  --diner-panel-soft: rgba(16, 20, 24, 0.96);
+  --diner-text: #e9feff;
+  --diner-muted: #9ad6d6;
+  --diner-line: rgba(0, 0, 0, 0.72);
+  color: var(--diner-text) !important;
+  max-width: 96vw;
+}
+
+.diner-manager-dialog .window-header {
+  background: var(--diner-bg) !important;
+  color: var(--diner-text) !important;
+  border: 2px solid var(--diner-accent) !important;
+  border-bottom: 0 !important;
+  border-radius: 12px 12px 0 0 !important;
+  box-shadow: 0 0 0 1px var(--diner-bg) inset, 0 0 12px rgba(0, 0, 0, 0.4);
+}
+
+.diner-manager-dialog .window-title,
+.diner-manager-dialog .window-header .close,
+.diner-manager-dialog .window-header .popout {
+  color: var(--diner-text) !important;
+  font-weight: 800;
+}
+
+.diner-manager-dialog .window-content {
+  color: var(--diner-text) !important;
+  background-color: var(--diner-bg) !important;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(var(--diner-bg), var(--diner-bg)) !important;
+  background-size: 24px 24px, 24px 24px, auto !important;
+  background-position: 0 0, 12px 12px, 0 0 !important;
+  border: 2px solid var(--diner-accent) !important;
+  border-top: 0 !important;
+  border-radius: 0 0 12px 12px !important;
+  padding: 8px 10px 10px !important;
+  overflow-y: auto;
+}
+
+/* Foundry footer must never consume unused dialog height. */
+.diner-manager-dialog .dialog-buttons {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  height: 52px !important;
+  padding: 8px 10px !important;
+  margin: 0 !important;
+  background: var(--diner-bg) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+}
+
+.diner-manager-dialog .dialog-button,
+.diner-shell .diner-btn {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 96px;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: 2px solid var(--diner-accent) !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  color: var(--diner-text) !important;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 32px !important;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+.diner-manager-dialog .dialog-button:hover,
+.diner-manager-dialog .dialog-button:focus,
+.diner-shell .diner-btn:hover:not([disabled]),
+.diner-shell .diner-btn:focus:not([disabled]) {
+  color: var(--diner-hover) !important;
+  border-color: var(--diner-hover) !important;
+  box-shadow: 0 0 0 2px var(--diner-hover) inset, 0 0 12px rgba(255, 221, 0, 0.25) !important;
+  outline: none !important;
+}
+
+.diner-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 650px;
+  color: var(--diner-text);
+}
+
+.diner-shell * {
+  box-sizing: border-box;
+}
+
+.diner-shell .diner-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+  background: var(--diner-panel-soft);
+  border: 2px solid var(--diner-accent);
+  border-radius: 10px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.diner-shell .diner-logo {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border: 2px solid var(--diner-accent);
+  border-radius: 9px;
+  background: #111;
+  object-fit: cover;
+}
+
+.diner-shell .diner-title {
+  color: var(--diner-accent);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.diner-shell .diner-subtitle {
+  margin-top: 4px;
+  color: var(--diner-muted);
+  font-size: 12px;
+}
+
+.diner-shell .diner-toolbar,
+.diner-shell .diner-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.diner-shell .diner-toolbar {
+  justify-content: space-between;
+}
+
+.diner-shell .diner-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.diner-shell .diner-grid-3 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(90px, 0.35fr);
+  gap: 9px;
+}
+
+.diner-shell .diner-card,
+.diner-shell .diner-section {
+  padding: 10px;
+  color: var(--diner-text);
+  background: var(--diner-panel);
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px var(--diner-accent) inset, 0 1px 0 rgba(255, 255, 255, 0.07) inset;
+}
+
+.diner-shell .diner-section-title {
+  margin-bottom: 7px;
+  color: var(--diner-accent);
+  font-weight: 900;
+}
+
+.diner-shell label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--diner-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.diner-shell input,
+.diner-shell select,
+.diner-shell textarea {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px !important;
+  color: var(--diner-text) !important;
+  caret-color: var(--diner-accent);
+  background: rgba(0, 0, 0, 0.52) !important;
+  border: 1px solid var(--diner-accent) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.diner-shell input:focus,
+.diner-shell select:focus,
+.diner-shell textarea:focus {
+  border-color: var(--diner-hover) !important;
+  outline: 1px solid var(--diner-hover) !important;
+}
+
+.diner-shell select option {
+  color: var(--diner-text);
+  background: var(--diner-bg);
+}
+
+.diner-shell input[type="color"] {
+  padding: 3px !important;
+  cursor: pointer;
+}
+
+.diner-shell input[type="number"] {
+  text-align: right;
+}
+
+.diner-shell textarea {
+  min-height: 68px;
+  resize: vertical;
+}
+
+.diner-shell input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  accent-color: var(--diner-accent);
+}
+
+.diner-shell .diner-inline-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+}
+
+.diner-shell .diner-muted {
+  color: var(--diner-muted);
+  font-size: 12px;
+}
+
+.diner-shell .diner-code {
+  padding: 4px 7px;
+  color: var(--diner-accent);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 247, 0.42);
+  border-radius: 6px;
+  font-family: monospace;
+  user-select: all;
+}
+
+.diner-shell .diner-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  overflow: visible;
+}
+
+.diner-shell .diner-manager-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.diner-shell .diner-entry-name {
+  color: var(--diner-text);
+  font-weight: 900;
+}
+
+.diner-shell .diner-entry-id {
+  color: var(--diner-accent);
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.diner-shell .diner-category-editor,
+.diner-shell .diner-item-editor {
+  display: grid;
+  gap: 8px;
+  align-items: end;
+}
+
+.diner-shell .diner-category-editor {
+  grid-template-columns: minmax(130px, 1.1fr) minmax(125px, 0.9fr) minmax(130px, 1fr) minmax(80px, 0.55fr) minmax(170px, 1.5fr) auto;
+}
+
+.diner-shell .diner-item-editor {
+  grid-template-columns: auto minmax(150px, 1.2fr) minmax(120px, 0.9fr) minmax(85px, 0.55fr) auto;
+}
+
+.diner-shell .diner-thumb {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--diner-line);
+  border-radius: 7px;
+  background: #111;
+  object-fit: cover;
+}
+
+.diner-shell .diner-drop {
+  padding: 12px;
+  color: var(--diner-muted);
+  border: 2px dashed var(--diner-accent);
+  border-radius: 10px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.diner-shell .diner-drop.is-dragging {
+  color: var(--diner-hover);
+  border-color: var(--diner-hover);
+  background: rgba(255, 221, 0, 0.08);
+}
+
+.diner-shell .diner-lifestyle-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.diner-shell .diner-pill {
+  padding: 6px 10px;
+  color: var(--diner-text);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--diner-accent);
+  border-radius: 18px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.diner-shell .diner-menu-category {
+  overflow: hidden;
+  background: var(--diner-panel);
+  border: 2px solid var(--diner-accent);
+  border-radius: 10px;
+}
+
+.diner-shell .diner-menu-category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  color: var(--diner-accent);
+  background: rgba(0, 255, 247, 0.075);
+  font-weight: 900;
+}
+
+.diner-shell .diner-menu-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.diner-shell .diner-menu-name {
+  overflow: hidden;
+  color: var(--diner-text);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diner-shell .diner-price-covered {
+  color: #80ff9c;
+  font-weight: 900;
+}
+
+.diner-shell .diner-price-paid {
+  color: #ffb0a9;
+  font-weight: 900;
+}
+
+.diner-shell .diner-btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 800px) {
+  .diner-shell {
+    min-width: 0;
+  }
+
+  .diner-shell .diner-grid-2,
+  .diner-shell .diner-grid-3,
+  .diner-shell .diner-category-editor,
+  .diner-shell .diner-item-editor,
+  .diner-shell .diner-lifestyle-summary,
+  .diner-shell .diner-manager-entry {
+    grid-template-columns: 1fr;
+  }
+}
+
+.diner-shell .diner-warning {
+  color: var(--diner-hover);
+  border-color: var(--diner-hover);
+  box-shadow: 0 0 0 2px var(--diner-hover) inset;
+}
+
+/* v1.0.2 — lock the Dialog form/footer and player menu to the Bodega/Vendit skin. */
+.diner-manager-dialog .window-content > form {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  min-height: 0 !important;
+  background: var(--diner-bg) !important;
+}
+
+.diner-manager-dialog .window-content > form > .dialog-content {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  background: var(--diner-bg) !important;
+}
+
+.diner-manager-dialog .window-content > form > .dialog-buttons,
+.diner-manager-dialog form .dialog-buttons {
+  flex: 0 0 52px !important;
+  width: 100% !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  background: var(--diner-bg) !important;
+}
+
+.diner-manager-dialog .dialog-buttons .dialog-button {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  color: var(--diner-accent) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid var(--diner-accent) !important;
+  border-radius: 10px !important;
+}
+
+.diner-manager-dialog .dialog-buttons .dialog-button:hover,
+.diner-manager-dialog .dialog-buttons .dialog-button:focus {
+  color: var(--diner-hover) !important;
+  border-color: var(--diner-hover) !important;
+}
+
+/* Player-facing menu uses exactly the same dark chrome as the manager. */
+.diner-manager-dialog .diner-player-shell {
+  color: var(--diner-text) !important;
+  background: transparent !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-header,
+.diner-manager-dialog .diner-player-shell .diner-card,
+.diner-manager-dialog .diner-player-shell .diner-menu-category,
+.diner-manager-dialog .diner-player-shell .diner-menu-item,
+.diner-manager-dialog .diner-player-shell .diner-lifestyle-summary,
+.diner-manager-dialog .diner-player-shell .diner-pill {
+  color: var(--diner-text) !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-menu-category {
+  background: var(--diner-panel) !important;
+  border: 0 !important;
+  box-shadow: 0 0 0 2px var(--diner-accent) inset, 0 1px 0 rgba(255, 255, 255, 0.07) inset !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-menu-category-header {
+  color: var(--diner-accent) !important;
+  background: rgba(0, 0, 0, 0.28) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--diner-accent) 45%, transparent) !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-menu-item {
+  background: rgba(0, 0, 0, 0.18) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-menu-name,
+.diner-manager-dialog .diner-player-shell .diner-entry-name {
+  color: var(--diner-text) !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-muted {
+  color: var(--diner-muted) !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-lifestyle-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: transparent !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-pill {
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.42) !important;
+  border: 1px solid var(--diner-accent) !important;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-pill-note {
+  display: block;
+  margin-top: 2px;
+  color: var(--diner-muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.diner-manager-dialog .diner-player-shell .diner-customer {
+  flex: 0 0 auto;
+  max-width: 36%;
+  text-align: right;
+}
+
+/* Avoid cyan remnants when the global 2045 red theme is active. */
+.diner-shell .diner-code {
+  border-color: color-mix(in srgb, var(--diner-accent) 45%, transparent) !important;
+}
+
+.diner-shell .diner-menu-category-header {
+  background: rgba(0, 0, 0, 0.28) !important;
+}
+
+@media (max-width: 900px) {
+  .diner-manager-dialog .diner-player-shell .diner-lifestyle-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .diner-manager-dialog .diner-player-shell .diner-lifestyle-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .diner-manager-dialog .diner-player-shell .diner-customer {
+    max-width: 100%;
+    text-align: left;
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * v1.1.0 — Bodega™ / Vendit™ / CHOOM TRADE visual unification
+ * ---------------------------------------------------------------------- */
+.diner-manager-dialog {
+  --diner-bg: #080b0d;
+  --diner-panel: rgba(0, 0, 0, 0.56);
+  --diner-panel-soft: rgba(0, 0, 0, 0.72);
+  --diner-text: #e9feff;
+  --diner-muted: color-mix(in srgb, var(--diner-accent) 62%, #aeb7ba);
+}
+
+.diner-manager-dialog .window-header {
+  border-width: 1px !important;
+  border-radius: 10px 10px 0 0 !important;
+}
+
+.diner-manager-dialog .window-content {
+  border-width: 1px !important;
+  border-radius: 0 0 10px 10px !important;
+  background-image:
+    linear-gradient(135deg, color-mix(in srgb, var(--diner-accent) 4%, transparent) 25%, transparent 25%),
+    linear-gradient(225deg, color-mix(in srgb, var(--diner-accent) 4%, transparent) 25%, transparent 25%),
+    linear-gradient(45deg, color-mix(in srgb, var(--diner-accent) 3%, transparent) 25%, transparent 25%),
+    linear-gradient(315deg, color-mix(in srgb, var(--diner-accent) 3%, transparent) 25%, var(--diner-bg) 25%) !important;
+  background-position: 10px 0, 10px 0, 0 0, 0 0 !important;
+  background-size: 20px 20px !important;
+}
+
+.diner-shell {
+  gap: 10px;
+}
+
+.diner-shell .diner-header,
+.diner-shell .diner-card,
+.diner-shell .diner-section,
+.diner-shell .diner-menu-category {
+  border: 1px solid var(--diner-accent) !important;
+  box-shadow: none !important;
+  background: var(--diner-panel) !important;
+}
+
+.diner-shell .diner-header {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px 2px 10px 10px !important;
+  padding: 11px 12px;
+}
+
+.diner-shell .diner-header::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 34px;
+  height: 12px;
+  background: var(--diner-hover);
+  clip-path: polygon(36% 0, 100% 0, 100% 100%, 0 100%);
+  opacity: .95;
+}
+
+.diner-shell .diner-brand-copy {
+  min-width: 0;
+}
+
+.diner-shell .diner-kicker {
+  color: var(--diner-muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.diner-shell .diner-title {
+  margin-top: 2px;
+  color: var(--diner-accent);
+  font-size: 23px;
+  font-weight: 950;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.diner-shell .diner-title span {
+  color: var(--diner-text);
+}
+
+.diner-shell .diner-brand-rule {
+  width: min(360px, 72%);
+  height: 2px;
+  margin: 5px 0 3px;
+  background: linear-gradient(90deg, var(--diner-hover), var(--diner-accent), transparent);
+}
+
+.diner-shell .diner-logo {
+  width: 54px;
+  height: 54px;
+  flex-basis: 54px;
+  padding: 5px;
+  border: 1px solid var(--diner-accent);
+  border-radius: 8px;
+  background: rgba(0,0,0,.72);
+  object-fit: contain;
+}
+
+.diner-manager-dialog .dialog-button,
+.diner-shell .diner-btn {
+  min-width: 0;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 12px !important;
+  border-width: 1px !important;
+  border-radius: 10px !important;
+  color: var(--diner-accent) !important;
+  background: rgba(0,0,0,.5) !important;
+  line-height: 32px !important;
+}
+
+.diner-shell .diner-icon-btn {
+  width: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+}
+
+.diner-manager-dialog .dialog-button:hover,
+.diner-manager-dialog .dialog-button:focus,
+.diner-shell .diner-btn:hover:not([disabled]),
+.diner-shell .diner-btn:focus:not([disabled]) {
+  color: var(--diner-hover) !important;
+  border-color: var(--diner-hover) !important;
+  box-shadow: none !important;
+}
+
+.diner-shell input,
+.diner-shell select,
+.diner-shell textarea {
+  border-width: 1px !important;
+  border-radius: 8px !important;
+  color: var(--diner-accent) !important;
+  background: rgba(0,0,0,.52) !important;
+}
+
+.diner-shell .diner-section-title,
+.diner-shell .diner-entry-id,
+.diner-shell .diner-menu-category-header {
+  color: var(--diner-accent) !important;
+}
+
+.diner-shell .diner-section-title {
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.diner-shell .diner-manager-entry {
+  background: rgba(0,0,0,.48) !important;
+}
+
+.diner-shell .diner-menu-category {
+  border-radius: 8px !important;
+}
+
+.diner-shell .diner-menu-category-header {
+  background: color-mix(in srgb, var(--diner-accent) 8%, rgba(0,0,0,.58)) !important;
+}
+
+.diner-shell .diner-menu-item {
+  background: rgba(0,0,0,.30) !important;
+}
+
+.diner-shell .diner-pill {
+  border-width: 1px !important;
+  border-radius: 8px !important;
+  background: rgba(0,0,0,.48) !important;
+}
+
+.diner-shell .diner-code {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  color: var(--diner-accent);
+  border: 1px solid color-mix(in srgb, var(--diner-accent) 48%, transparent) !important;
+  border-radius: 6px;
+}
+
+.diner-shell .diner-script-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  margin-top: 8px;
+  color: var(--diner-muted);
+  font-size: 12px;
+}
+
+.diner-shell .diner-tile-status,
+.diner-shell .diner-note {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--diner-hover);
+  background: rgba(0,0,0,.38);
+  color: var(--diner-muted);
+  font-size: 12px;
+}
+
+.diner-shell .diner-type-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid var(--diner-accent);
+  border-radius: 999px;
+  color: var(--diner-accent);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.diner-shell .diner-auto-template-row .diner-btn {
+  flex: 0 0 auto !important;
+  max-width: 180px;
+  white-space: nowrap;
+}
+
+/* CHOOM TRADE-like hard accent line at the top of primary surfaces. */
+.diner-shell .diner-section::before,
+.diner-shell .diner-card::before {
+  content: "";
+  display: block;
+  width: 42px;
+  height: 2px;
+  margin: -4px 0 7px;
+  background: var(--diner-hover);
+  opacity: .9;
+}
+
+.diner-shell .diner-item-editor::before,
+.diner-shell .diner-manager-entry::before,
+.diner-shell .diner-warning::before {
+  display: none;
+}
+
+@media (max-width: 780px) {
+  .diner-shell .diner-script-row {
+    grid-template-columns: 1fr;
+  }
+  .diner-shell .diner-header::after {
+    width: 24px;
+  }
+}
+
+/* v1.1.1 — Create Menu Item controls */
+.diner-manager-dialog,
+.diner-shell {
+  color-scheme: dark;
+}
+
+.diner-create-item-shell,
+.diner-create-item-section {
+  overflow: visible !important;
+}
+
+.diner-shell .diner-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--diner-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.diner-shell .diner-field-label {
+  color: var(--diner-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.diner-shell .diner-custom-select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  z-index: 1;
+}
+
+.diner-shell .diner-custom-select.is-open {
+  z-index: 80;
+}
+
+.diner-shell .diner-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  min-height: 34px;
+  margin: 0;
+  padding: 6px 9px;
+  color: var(--diner-accent);
+  background: rgba(0, 0, 0, 0.62);
+  border: 1px solid var(--diner-accent);
+  border-radius: 8px;
+  box-shadow: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.diner-shell .diner-select-trigger:hover,
+.diner-shell .diner-select-trigger:focus,
+.diner-shell .diner-custom-select.is-open .diner-select-trigger {
+  color: var(--diner-hover);
+  border-color: var(--diner-hover);
+  outline: none;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--diner-hover) 35%, transparent);
+}
+
+.diner-shell .diner-select-trigger-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diner-shell .diner-select-trigger i {
+  flex: 0 0 auto;
+  transition: transform 120ms ease;
+}
+
+.diner-shell .diner-custom-select.is-open .diner-select-trigger i {
+  transform: rotate(180deg);
+}
+
+.diner-shell .diner-select-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  display: none;
+  max-height: 220px;
+  padding: 5px;
+  overflow-y: auto;
+  background:
+    linear-gradient(rgba(0,0,0,.88), rgba(0,0,0,.88)),
+    var(--diner-bg);
+  border: 1px solid var(--diner-accent);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.72), 0 0 0 1px rgba(255,255,255,.04) inset;
+}
+
+.diner-shell .diner-custom-select.is-open .diner-select-menu {
+  display: block;
+}
+
+.diner-shell .diner-select-option {
+  display: block;
+  width: 100%;
+  min-height: 31px;
+  margin: 0;
+  padding: 6px 9px;
+  color: var(--diner-text);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  box-shadow: none;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+}
+
+.diner-shell .diner-select-option + .diner-select-option {
+  margin-top: 2px;
+}
+
+.diner-shell .diner-select-option:hover,
+.diner-shell .diner-select-option:focus {
+  color: #050505;
+  background: var(--diner-hover);
+  outline: none;
+}
+
+.diner-shell .diner-select-option.is-selected {
+  color: #050505;
+  background: var(--diner-accent);
+  font-weight: 900;
+}
+
+.diner-shell .diner-image-picker-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.diner-shell .diner-create-img-preview {
+  width: 36px;
+  height: 34px;
+  padding: 3px;
+  object-fit: contain;
+  background: rgba(0,0,0,.7);
+  border: 1px solid var(--diner-accent);
+  border-radius: 7px;
+}
+
+.diner-shell .diner-image-picker-row .diner-create-img {
+  min-width: 0;
+}
+
+.diner-shell .diner-image-picker-row .diner-image-browse {
+  width: auto !important;
+  min-width: 84px !important;
+  white-space: nowrap;
+}
+
+/* v1.1.2 — force custom Diner selects to ignore Foundry/native button fills. */
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-trigger {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: rgba(0, 0, 0, 0.78) !important;
+  background-image: none !important;
+  color: var(--diner-accent) !important;
+  border: 1px solid var(--diner-accent) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-trigger:hover,
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-trigger:focus,
+.diner-manager-dialog .diner-shell .diner-custom-select.is-open .diner-select-trigger {
+  background: rgba(0, 0, 0, 0.88) !important;
+  color: var(--diner-hover) !important;
+  border-color: var(--diner-hover) !important;
+  box-shadow: none !important;
+}
+
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-menu {
+  background: #070a0c !important;
+  background-image: none !important;
+  border: 1px solid var(--diner-accent) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.78) !important;
+}
+
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-option {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: rgba(0, 0, 0, 0.72) !important;
+  background-image: none !important;
+  color: var(--diner-text) !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-option:hover,
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-option:focus {
+  background: color-mix(in srgb, var(--diner-hover) 10%, #070a0c) !important;
+  color: var(--diner-hover) !important;
+  border-color: var(--diner-hover) !important;
+  outline: none !important;
+}
+
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-option.is-selected {
+  background: color-mix(in srgb, var(--diner-accent) 10%, #070a0c) !important;
+  color: var(--diner-accent) !important;
+  border-color: var(--diner-accent) !important;
+  box-shadow: inset 3px 0 0 var(--diner-accent) !important;
+  font-weight: 900 !important;
+}
+
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-option.is-selected:hover,
+.diner-manager-dialog .diner-shell .diner-custom-select .diner-select-option.is-selected:focus {
+  background: color-mix(in srgb, var(--diner-hover) 10%, #070a0c) !important;
+  color: var(--diner-hover) !important;
+  border-color: var(--diner-hover) !important;
+  box-shadow: inset 3px 0 0 var(--diner-hover) !important;
+}
+
+/* v1.1.3 — multi-Tile unbinding and real Active Effect fabrication */
+.diner-shell .diner-bound-toolbar {
+  margin: 0;
+  gap: 8px;
+}
+
+.diner-shell .diner-bound-toolbar > span {
+  color: var(--diner-text);
+  font-weight: 800;
+}
+
+.diner-shell .diner-bound-toolbar .diner-danger-btn {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 110px;
+}
+
+.diner-shell .diner-bound-tile-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.diner-shell .diner-bound-tile-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 8px;
+  background: rgba(0, 0, 0, .42);
+  border: 1px solid color-mix(in srgb, var(--diner-accent) 42%, transparent);
+  border-radius: 7px;
+}
+
+.diner-shell .diner-bound-tile-row.is-missing {
+  border-color: color-mix(in srgb, var(--diner-hover) 55%, transparent);
+}
+
+.diner-shell .diner-bound-tile-copy {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) minmax(110px, auto) minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.diner-shell .diner-bound-tile-copy b {
+  color: var(--diner-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diner-shell .diner-bound-tile-copy span {
+  color: var(--diner-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diner-shell .diner-bound-tile-copy code {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--diner-accent) 70%, #ffffff);
+  font-size: 10px;
+}
+
+.diner-shell .diner-effect-builder {
+  margin: 10px 0;
+  padding: 10px;
+  background: rgba(0, 0, 0, .38);
+  border: 1px solid color-mix(in srgb, var(--diner-accent) 65%, transparent);
+  border-radius: 8px;
+}
+
+.diner-shell .diner-effect-toolbar {
+  margin-bottom: 8px;
+}
+
+.diner-shell .diner-effect-add-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.diner-shell .diner-effect-add-row > .diner-btn {
+  width: auto !important;
+  min-width: 116px;
+  white-space: nowrap;
+}
+
+.diner-shell .diner-selected-effects {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.diner-shell .diner-empty-effects {
+  padding: 8px;
+  border: 1px dashed color-mix(in srgb, var(--diner-accent) 38%, transparent);
+  border-radius: 6px;
+}
+
+.diner-shell .diner-effect-chip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 8px;
+  background: rgba(0, 0, 0, .58);
+  border: 1px solid color-mix(in srgb, var(--diner-accent) 48%, transparent);
+  border-radius: 7px;
+}
+
+.diner-shell .diner-effect-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.diner-shell .diner-effect-copy b {
+  color: var(--diner-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diner-shell .diner-effect-copy span {
+  color: var(--diner-muted);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diner-shell .diner-effect-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.diner-shell .diner-effect-consumed {
+  width: auto !important;
+  min-width: 104px;
+  white-space: nowrap;
+}
+
+.diner-shell .diner-effect-consumed.is-consumed {
+  color: var(--diner-hover) !important;
+  border-color: var(--diner-hover) !important;
+  box-shadow: inset 3px 0 0 var(--diner-hover) !important;
+}
+
+@media (max-width: 760px) {
+  .diner-shell .diner-bound-tile-copy {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .diner-shell .diner-effect-add-row,
+  .diner-shell .diner-effect-chip {
+    grid-template-columns: 1fr;
+  }
+  .diner-shell .diner-effect-actions {
+    justify-content: flex-end;
+  }
+}

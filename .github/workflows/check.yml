@@ -1,0 +1,19 @@
+name: Check module
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests
+        run: node --test test/*.test.mjs
+      - name: Validate manifest and package
+        run: python tools/package.py

@@ -1,0 +1,26 @@
+[
+  {
+    "component": "trade",
+    "repo": "https://github.com/LtAtasEDO/Choom-Trade",
+    "version": "1.0.4",
+    "commit": "a269e44343c60ab4fab1672599f445b08564d2a6"
+  },
+  {
+    "component": "bodega",
+    "repo": "https://github.com/LtAtasEDO/Bodega-Persistent-Shops",
+    "version": "2.3.14",
+    "commit": "abde69c7ec0f594fb2c6d404e3bae8f74db25004"
+  },
+  {
+    "component": "diner",
+    "repo": "https://github.com/LtAtasEDO/Diner-Manager",
+    "version": "1.1.4",
+    "commit": "ade164166d9e62c363845e369de44ec2a376cf45"
+  },
+  {
+    "component": "vendit",
+    "repo": "https://github.com/LtAtasEDO/Vendit-Persistent-Shops",
+    "version": "1.2.6",
+    "commit": "c515f40975560ce4c55f5d2f610da85d1d8c4814"
+  }
+]
