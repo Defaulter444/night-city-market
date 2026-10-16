@@ -1,5 +1,5 @@
 import {art,sidebar,clockText,hero,homeView,actorCard,shopAside,productCategory,editorView,saveEditor,addCategory,removeProduct,settingsView,saveSettings,helpView} from './streetlife.mjs';
-import {ID,activeOriginals,saleBlocked,fixerRank} from './core.mjs';
+import {ID,activeOriginals,saleBlocked,fixerRank,requireMarketGM,canOpenMarketTab} from './core.mjs';
 import '../vendor/trade.mjs';
 import '../vendor/bodega.mjs';
 import {DEPARTMENTS,readDepartment,getPoint,canVisit,buy,sell,quoteOrder} from './commerce.mjs';
@@ -20,11 +20,13 @@ class MarketWindow extends Application {
   async _renderInner(){return $(await this.content());}
   async content(){
     const actors=ownActors(),gm=game.user.isGM;
+    if(!canOpenMarketTab(this.tab)){this.tab='home';this.editing=false;}
+    if(!gm){this.editing=false;this.copySource=null;}
     if(!actors.some(a=>a.id===this.buyerId))this.buyerId=defaultBuyer()?.id;
     let body='';
     if(this.editing&&gm&&DEPARTMENTS[this.tab]){const shop=getPoint(this.tab,this.selected[this.tab]);if(shop)body=editorView(this.tab,shop,this.editorSection);else this.editing=false;}
-    if(!body)body=this.tab==='home'?homeView(gm):this.tab==='settings'?settingsView(gm):this.tab==='help'?helpView():this.tab==='quick'?this.quickContent():this.tab==='trade'?this.tradeContent():await this.shopContent();
-    return `<main class="ncm-shell">${sidebar(this.tab,gm)}<section class="sl-workspace"><header class="sl-topbar"><strong>StreetLife <small>Cyberpunk RED</small></strong><span>${icon('location-dot')} ${esc(canvas.scene?.name||'Найт-Сити')}</span><span>${icon('calendar-days')} <time data-game-time>${esc(clockText())}</time></span><span class="${game.users.activeGM?'sl-ok':''}">${icon('circle')} ${game.users.activeGM?'Мастер в сети':'Мастер не подключён'}</span></header><div class="sl-customer"><label>Персонаж<select name="buyer" aria-label="Персонаж" ${(this.editing||this.tab==='settings')?'disabled':''}>${options([['','Выберите персонажа'],...actors.map(a=>[a.id,a.name])],this.buyerId)}</select></label><div>${icon('wallet')} На счету <strong>${this.buyer?money(this.buyer.system.wealth?.value):'—'}</strong></div></div><div class="ncm-body">${body}</div><footer class="ncm-status" role="status"><span>${icon('circle-info')} ${esc(this.message||'StreetLife · Люди. Сделки. Истории.')}</span><button type="button" data-action="help" title="Как пользоваться">${icon('circle-question')}</button></footer></section></main>`;
+    if(!body)body=this.tab==='home'?homeView(gm):this.tab==='settings'?settingsView():this.tab==='help'?helpView():this.tab==='quick'?this.quickContent():this.tab==='trade'?this.tradeContent():await this.shopContent();
+    return `<main class="ncm-shell">${sidebar(this.tab)}<section class="sl-workspace"><header class="sl-topbar"><strong>StreetLife <small>Cyberpunk RED</small></strong><span>${icon('location-dot')} ${esc(canvas.scene?.name||'Найт-Сити')}</span><span>${icon('calendar-days')} <time data-game-time>${esc(clockText())}</time></span><span class="${game.users.activeGM?'sl-ok':''}">${icon('circle')} ${game.users.activeGM?'Мастер в сети':'Мастер не подключён'}</span></header><div class="sl-customer"><label>Персонаж<select name="buyer" aria-label="Персонаж" ${(this.editing||this.tab==='settings')?'disabled':''}>${options([['','Выберите персонажа'],...actors.map(a=>[a.id,a.name])],this.buyerId)}</select></label><div>${icon('wallet')} На счету <strong>${this.buyer?money(this.buyer.system.wealth?.value):'—'}</strong></div></div><div class="ncm-body">${body}</div><footer class="ncm-status" role="status"><span>${icon('circle-info')} ${esc(this.message||'StreetLife · Люди. Сделки. Истории.')}</span><button type="button" data-action="help" title="Как пользоваться">${icon('circle-question')}</button></footer></section></main>`;
   }
 
   async shopContent(){
@@ -65,6 +67,7 @@ class MarketWindow extends Application {
     return `<section class="ncm-detail ncm-trade">${hero('ПЕРЕДАЧА ВЕЩЕЙ','МЕЖДУ СВОИМИ','trade')}<div class="sl-actors">${actorCard(this.buyer,'ОТПРАВИТЕЛЬ')}${icon('angles-right')}${actorCard(game.actors.get(this.targetId),'ПОЛУЧАТЕЛЬ','cyan')}</div><div class="ncm-detail-head"><div><h2>Передать снаряжение</h2><p>Оружие передаётся вместе с установленными улучшениями.</p></div><label>Получатель<select name="recipient">${options([['','Выберите получателя'],...actors.map(a=>[a.id,a.name])],this.targetId)}</select></label></div><div class="ncm-toolbar"><label class="ncm-search">${icon('magnifying-glass')}<input type="search" name="search" placeholder="Найти предмет" value="${esc(this.query)}"></label></div><div class="ncm-products">${items.map(item=>{const bundle=bundleItemIds(this.buyer,item.id).length>1;return `<article class="ncm-product" data-search="${esc(item.name.toLocaleLowerCase('ru'))}">${picture(item.img,item.name)}<div class="ncm-product-name"><strong>${esc(item.name)}</strong><small>${bundle?'В комплекте с улучшениями':`В наличии: ${itemAmount(item)}`}</small></div><label class="ncm-quantity">Кол-во<input name="qty" type="number" min="1" max="${itemAmount(item)}" value="${bundle?itemAmount(item):1}" ${bundle?'readonly':''}></label><button type="button" data-transfer="${item.id}" ${!this.targetId||!game.users.activeGM?'disabled':''}>Передать</button></article>`;}).join('')||'<p class="ncm-muted">Нет доступных предметов. Выберите персонажа сверху.</p>'}<p class="ncm-no-results" hidden>Ничего не найдено</p></div></section>`;
   }
   quickContent(){
+    requireMarketGM();
     const p=PRESETS[this.quickPreset];
     return `<section class="ncm-quick"><div><span class="ncm-eyebrow">ДЛЯ МАСТЕРА</span><h2>Торговая точка за два шага</h2><p>Выберите набор. Затем укажите место на карте.</p></div><form class="ncm-quick-form"><div class="ncm-presets">${Object.entries(PRESETS).map(([id,v])=>`<button type="button" data-preset="${id}" class="${id===this.quickPreset?'active':''}">${icon(v.icon)}<strong>${v.label}</strong><small>${esc(v.description)}</small></button>`).join('')}</div><div class="ncm-quick-fields"><label>Название<input name="pointName" type="text" required maxlength="100" value="${esc(this.copySource?.name||p.label)}"></label><div class="ncm-quick-summary">${this.copySource?`${icon('copy')} Копия «${esc(this.copySource.name)}»: ${(this.copySource.items??[]).length} товаров. Запасы будут независимыми.`:`${icon('wand-magic-sparkles')} До ${p.stockCount} разных товаров по умолчанию; количество можно изменить. Подбор из всех подходящих предметов и компендиумов, по цене до ${money(p.maxPrice)} за товар. Цены и свойства сохраняются.`}</div>${!this.copySource?`<label>Разных товаров<input name="stockCount" type="number" min="1" max="120" step="1" value="${p.stockCount}" required></label>`:""}</div><p class="ncm-muted">${esc(p.description)} Если подходящих предметов меньше, будут добавлены только доступные. Цены указаны за упаковку.</p><div class="ncm-quick-options">${!this.copySource?'<label class="ncm-check"><input name="empty" type="checkbox"> Пустая точка — добавлю товары сам</label>':''}${p.part!=='diner'?'<label class="ncm-check"><input name="restock" type="checkbox" checked> Пополнять до исходного запаса каждый игровой день</label>':'<p class="ncm-muted">Кафе проверяет рацион персонажа и дневной лимит включённых блюд.</p>'}<label class="ncm-check"><input name="repeat" type="checkbox"> Разместить несколько одинаковых точек</label></div><div class="ncm-quick-submit"><button type="submit" class="primary">${icon('location-dot')} Разместить на карте</button><button type="button" data-action="quick-token">${icon('user-tag')} На выбранный токен</button></div><p class="ncm-muted">Щелчок ставит точку, Esc завершает расстановку. Двойной щелчок открывает ассортимент. Alt + двойной щелчок — обычные настройки токена или тайла.</p></form></section>`;
   }
@@ -83,15 +86,15 @@ class MarketWindow extends Application {
     html.find('[data-edit]').on('change',e=>{const el=e.currentTarget,row=el.closest('article');this.perform(()=>updateProduct(this.tab,this.selected[this.tab],Number(row.dataset.index),{[el.dataset.edit]:el.value},row.dataset.identity),'Товар обновлён');});
     html.on('click','button[type="button"]',e=>{
       const b=e.currentTarget,d=b.dataset,row=b.closest('article'),qty=Number(row?.querySelector('[name="qty"]')?.value||1);
-      if(d.tab){if(!this.leaveEditor())return;this.tab=d.tab;this.query='';this.category='';this.mode='buy';this.inspected=0;if(d.tab==='quick')this.copySource=null;this.render(false);}
+      if(d.tab){if(!canOpenMarketTab(d.tab))return ui.notifications.warn('Этот раздел доступен только Мастеру.');if(!this.leaveEditor())return;this.tab=d.tab;this.query='';this.category='';this.mode='buy';this.inspected=0;if(d.tab==='quick')this.copySource=null;this.render(false);}
       else if(d.point){this.selected[this.tab]=d.point;this.query='';this.render(false);}
       else if(d.mode){this.mode=d.mode;this.category='';this.render(false);}
       else if('inspect' in d){this.inspected=Number(d.inspect);this.render(false);}
       else if('categoryFilter' in d){this.category=d.categoryFilter;html.find('[data-category-filter]').removeClass('active');b.classList.add('active');this.filter(html);}
-      else if(d.editorTab){if(!this.leaveEditor())return;this.editing=true;this.editorSection=d.editorTab;this.render(false);}
+      else if(d.editorTab){if(!game.user.isGM)return; if(!this.leaveEditor())return;this.editing=true;this.editorSection=d.editorTab;this.render(false);}
       else if(d.openItem){this.perform(async()=>{const item=await fromUuid(d.openItem);if(item?.testUserPermission(game.user,'LIMITED')||item?.pack)item?.sheet?.render(true);else throw Error('Описание предмета недоступно.');},'Описание открыто');}
       else if('removeProduct' in d){if(this.hasDirtyForm()){ui.notifications.warn('Сначала сохраните изменения.');return;}const entry=b.closest('[data-product-index]');this.perform(()=>removeProduct(this.tab,this.selected[this.tab],Number(d.removeProduct),entry.dataset.identity),'Товар удалён из витрины');}
-      else if(d.preset){this.quickPreset=d.preset;this.copySource=null;this.render(false);}
+      else if(d.preset){if(!game.user.isGM)return;this.quickPreset=d.preset;this.copySource=null;this.render(false);}
       else if('buy' in d)this.perform(()=>buy(this.tab,this.selected[this.tab],Number(d.buy),this.buyer,qty),'Покупка выполнена');
       else if(d.sell)this.perform(()=>sell(this.selected.bodega,d.sell,this.buyer,qty),'Продажа выполнена');
       else if(d.transfer)this.perform(()=>game.choomTrade.requestTransfer({sourceActorUuid:this.buyer.uuid,targetActorUuid:game.actors.get(this.targetId)?.uuid,itemId:d.transfer,quantity:qty}),'Предмет передан');
@@ -116,6 +119,7 @@ class MarketWindow extends Application {
   async action(action){
     if(action==='help'){if(!this.leaveEditor())return;this.tab='help';this.render(false);return;}
     if(action==='inventory'){this.buyer?.sheet?.render(true);return;}
+    if(!game.user.isGM)return ui.notifications.warn('Настройки и управление торговлей доступны только Мастеру.');
     if(action==='item-directory'){ui.sidebar.activateTab('items');ui.items.renderPopout();return;}
     if(action==='editor-cancel'){this.editing=false;this.message='Изменения отменены';this.render(false);return;}
     if(action==='editor-close'){if(!this.leaveEditor())return;this.render(false);return;}
@@ -138,10 +142,11 @@ class MarketWindow extends Application {
   async close(options){this._marketClosing=true;cancelPlacement();try{return await super.close(options);}finally{this._marketClosing=false;}}
 }
 export function openMarket({tab,id,buyer}={}){
+  if(tab&&!canOpenMarketTab(tab))return ui.notifications.warn('Этот раздел недоступен. Настройки и управление открывает Мастер.');
   if(app?.rendered&&app.hasDirtyForm()){app.leaveEditor();app.bringToTop();return app;}
   const conflicts=activeOriginals();if(conflicts.length)return ui.notifications.error('Отключите отдельные исходные модули: '+conflicts.join(', '));
   if(id&&DEPARTMENTS[tab]){const shop=getPoint(tab,id);if(!shop||!canVisit(shop))return ui.notifications.warn('Эта торговая точка недоступна.');}
-  app??=new MarketWindow();if(tab&&(DEPARTMENTS[tab]||['home','trade','settings','help'].includes(tab)||(tab==='quick'&&game.user.isGM)))app.tab=tab;if(id&&DEPARTMENTS[app.tab])app.selected[app.tab]=id;if(buyer)app.buyerId=buyer.id;app.editing=false;
+  app??=new MarketWindow();if(tab)app.tab=tab;if(id&&DEPARTMENTS[app.tab])app.selected[app.tab]=id;if(buyer)app.buyerId=buyer.id;app.editing=false;
   if(id&&game.user.isGM)app.onlyScene=false;
   app.render(true);return app;
 }

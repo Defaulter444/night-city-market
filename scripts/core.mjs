@@ -4,6 +4,15 @@ let queue = Promise.resolve();
 const completed = new Map();
 export const originalModules=['choom-trade','bodega','diner-manager','vendit'];
 export function activeOriginals(){return originalModules.filter(id=>game.modules?.get(id)?.active);}
+/** Check the current role at each entry point, never a rendered/cached GM flag. */
+export function requireMarketGM(){
+  if(!globalThis.game?.user?.isGM)throw Error('Настройки и управление торговлей доступны только Мастеру.');
+  return true;
+}
+export function canOpenMarketTab(tab,user=globalThis.game?.user){
+  return ['home','trade','bodega','diner','vendit','help'].includes(tab)
+    || (!!user?.isGM&&['settings','quick'].includes(tab));
+}
 // Register normally, but leave the originals' APIs and listeners alone on conflict.
 export const componentHooks={
   on(event,callback){if(event==='getSceneControlButtons')return null;return Hooks.on(event,(...args)=>{if(!activeOriginals().length)return callback(...args);});},

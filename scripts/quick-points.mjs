@@ -67,7 +67,7 @@ export async function createPoint(prepared,{scene=canvas.scene,x,y,token=null}={
   if(!token&&(!Number.isFinite(x)||!Number.isFinite(y)))throw Error('Укажите место на карте.');
   if(token&&(token.parent.id!==scene.id||token.getFlag(ID,'point')||game.bodega.resolveVendorTokenSync(token)))throw Error('Токен недоступен или уже привязан к торговой точке.');
   return transaction(async()=>{
-    const preset=PRESETS[prepared.presetId],spec=DEPARTMENTS[preset.part],db=readDepartment(preset.part);
+    assertGM();const preset=PRESETS[prepared.presetId],spec=DEPARTMENTS[preset.part],db=readDepartment(preset.part);
     const id=foundry.utils.randomID();let name=prepared.name,count=2;
     const names=new Set(Object.values(db[spec.collection]??{}).map(p=>p.name));while(names.has(name))name=`${prepared.name} ${count++}`;
     const point=pointData({...prepared,id,name,scene,dayKey:currentWorldDayKey()});
@@ -108,13 +108,13 @@ export function startPlacement(prepared,{repeat=false,onPlaced=()=>{},onEnd=()=>
   placement={cancel};view.addEventListener('pointerdown',click,true);document.addEventListener('keydown',key,true);
 }
 export async function refill(part,id,{force=true}={}){
-  assertGM();return transaction(async()=>{const spec=DEPARTMENTS[part],db=readDepartment(part),point=db[spec.collection]?.[id];if(!point?.quick)throw Error('Для этой точки настройте поставки в дополнительных параметрах.');if(refillPoint(point,currentWorldDayKey(),{force}))await game.settings.set(ID,spec.key,db);});
+  assertGM();return transaction(async()=>{assertGM();const spec=DEPARTMENTS[part],db=readDepartment(part),point=db[spec.collection]?.[id];if(!point?.quick)throw Error('Для этой точки настройте поставки в дополнительных параметрах.');if(refillPoint(point,currentWorldDayKey(),{force}))await game.settings.set(ID,spec.key,db);});
 }
 export async function setRestock(part,id,enabled){
-  assertGM();return transaction(async()=>{const spec=DEPARTMENTS[part],db=readDepartment(part),point=db[spec.collection]?.[id];if(!point?.quick)throw Error('Быстрая точка не найдена.');point.quick.restock=!!enabled;point.quick.dayKey=currentWorldDayKey();await game.settings.set(ID,spec.key,db);});
+  assertGM();return transaction(async()=>{assertGM();const spec=DEPARTMENTS[part],db=readDepartment(part),point=db[spec.collection]?.[id];if(!point?.quick)throw Error('Быстрая точка не найдена.');point.quick.restock=!!enabled;point.quick.dayKey=currentWorldDayKey();await game.settings.set(ID,spec.key,db);});
 }
 export async function updateProduct(part,id,index,patch,identity){
-  assertGM();return transaction(async()=>{const spec=DEPARTMENTS[part],db=readDepartment(part),shop=db[spec.collection]?.[id],item=shop?.items[index];if(!item||(item.uuid||item.name)!==identity)throw Error('Ассортимент изменился. Откройте точку заново.');
+  assertGM();return transaction(async()=>{assertGM();const spec=DEPARTMENTS[part],db=readDepartment(part),shop=db[spec.collection]?.[id],item=shop?.items[index];if(!item||(item.uuid||item.name)!==identity)throw Error('Ассортимент изменился. Откройте точку заново.');
     for(const key of ['price','qty'])if(key in patch){const value=Number(patch[key]);if(!Number.isFinite(value)||value<0||value>10000000)throw Error('Введите неотрицательное число.');item[key]=Math.floor(value);}
     if('qty' in patch&&shop.quick){const target=shop.quick.targets.find(t=>(t.uuid||t.name)===identity);if(target)target.qty=item.qty;}
     await game.settings.set(ID,spec.key,db);
@@ -122,7 +122,7 @@ export async function updateProduct(part,id,index,patch,identity){
 }
 export async function addProduct(part,id,doc){
   assertGM();if(doc?.documentName!=='Item'||!['gear','drug','ammo','weapon','armor','clothing','cyberware','itemUpgrade','cyberdeck'].includes(doc.type))throw Error('Перетащите предмет снаряжения.');
-  return transaction(async()=>{const spec=DEPARTMENTS[part],db=readDepartment(part),shop=db[spec.collection]?.[id];if(!shop)throw Error('Точка не найдена.');
+  return transaction(async()=>{assertGM();const spec=DEPARTMENTS[part],db=readDepartment(part),shop=db[spec.collection]?.[id];if(!shop)throw Error('Точка не найдена.');
     if(shop.items.some(i=>i.uuid===doc.uuid))throw Error('Этот предмет уже есть в ассортименте.');
     const presetId=part==='bodega'?'street':part;const entry=pointData({id:'temporary',name:'',presetId,items:[doc],scene:canvas.scene??{},dayKey:''}).items[0];entry.id=foundry.utils.randomID();entry.categoryId=shop.categories?.[0]?.id||'menu';shop.items.push(entry);
     if(shop.quick)shop.quick.targets.push({uuid:entry.uuid,name:entry.name,qty:entry.qty});await game.settings.set(ID,spec.key,db);

@@ -1,5 +1,5 @@
 import {acceptsBuyback} from "../scripts/point-model.mjs";
-import {componentSocket, componentHooks, transaction, onceTransaction, requireCustomer, requireProximity, fixerRank, foodTierId, housingItem, textName, lifestyleItem, intrinsicAttack, kindLabel, saleBlocked, fitDialog} from "../scripts/core.mjs";
+import {componentSocket, componentHooks, transaction, onceTransaction, requireCustomer, requireProximity, fixerRank, foodTierId, housingItem, textName, lifestyleItem, intrinsicAttack, kindLabel, saleBlocked, fitDialog, requireMarketGM} from "../scripts/core.mjs";
 const marketSocket=componentSocket("bodega");
 /**
  * Bodega™ Persistent Shops — Foundry VTT Module v2.3.13
@@ -1537,7 +1537,7 @@ async function loadAll(){
 
   return val;
 }
-async function saveAll(db){ ensureSetting(); return game.settings.set(STORE_NS, STORE_KEY, db); }
+async function saveAll(db){ requireMarketGM(); ensureSetting(); return game.settings.set(STORE_NS, STORE_KEY, db); }
 
 // -------------------- theme --------------------
 function updateOpenShopStock(shopId, itemKey, stockClass, qty){
@@ -2664,6 +2664,7 @@ function priceWithFixerBuyDiscount(listPrice, isFixer, rank, discCfg, fixerOnlyF
 
 // -------------------- Options dialog --------------------
 async function openOptions(){
+  requireMarketGM();
   const bodyId = makeUiId("options");
   const db = await loadAll();
   const accent = db.era2045 ? "#E64539" : "#00FFF7";
@@ -2917,6 +2918,7 @@ async function unbindAllShopTiles(shopOrId){
   return count;
 }
 async function refreshShopTileBindings(shop, oldId=null){
+  requireMarketGM();
   for (const uuid of shop?.tileUuids || []){
     const tile = await resolveTileDocument(uuid);
     const binding = getTileBinding(tile);
@@ -2949,6 +2951,7 @@ async function createTileHelperMacro(){
 
 // -------------------- Admin UI --------------------
 async function openAdmin() {
+  requireMarketGM();
   const bodyId = makeUiId("manager");
   const db = await loadAll();
   const accent = db.era2045 ? "#E64539" : "#00FFF7";
@@ -3054,6 +3057,7 @@ async function openAdmin() {
       });
 
       async function editShop(v=null){
+        requireMarketGM();
         const data = v ? duplicate(v) : {
           id: randomID(), name: "Новый магазин", sceneOnly: true,
           sceneId, sceneName: canvas?.scene?.name ?? "",
@@ -4400,10 +4404,10 @@ function exposeAPI() {
     findRollTable,
     findRollTables,
     drawFromTable,
-    adjustWealth,
+    adjustWealth:(...args)=>{requireMarketGM();return adjustWealth(...args);},
     readStackQty,
-    writeStackQty,
-    giveFromShopQty,
+    writeStackQty:(...args)=>{requireMarketGM();return writeStackQty(...args);},
+    giveFromShopQty:(...args)=>{requireMarketGM();return giveFromShopQty(...args);},
     quoteBuy:(shop,item,buyer,db)=>{ const rank=getFixerRank(buyer); return bodegaBuyPricing(item.price|0,shop,buyer,rank>0,rank,db.defaults?.fixerDiscounts??defaultDB().defaults.fixerDiscounts,!!item.fixerOnly); },
     quoteSell:async(shop,item,buyer,db,qty=1)=>{ const kind=getItemKind(item),bb=shop.buyback?.[kind]; if(!bb?.on||saleBlocked(item,buyer)||!acceptsBuyback(shop,item))return null; const pack=await resolveMarketPackageInfo(item); const pct=applyFixerBonusToSell(bb.pct|0,getFixerRank(buyer),db.defaults?.fixerDiscounts??defaultDB().defaults.fixerDiscounts); return {verified:pack.verified,size:pack.packageSize,market:pack.marketPrice,pct,total:proportionalBuybackTotal(pack.marketPrice,pct,qty,pack.packageSize)}; },
     reviewBuyback:payload=>new Promise(resolve=>openGMReviewBuyback(payload,resolve)),
@@ -4411,6 +4415,7 @@ function exposeAPI() {
     gmProcessPurchase,
     processDynamicInventory,
     generateDynamicStock:async (shopId, replace=false) => {
+      requireMarketGM();
       const db = await loadAll(); const shop = db.shops?.[shopId]; if (!shop) return null;
       shop.dynamic = normalizeDynamicSettings(shop.dynamic); shop.dynamic.enabled = true;
       await fillDynamicStock(shop, {replace, defaults:db.defaults, now:calendarTimestamp()});
@@ -4418,10 +4423,12 @@ function exposeAPI() {
       await saveAll(db); return shop;
     },
     runCustomerCycle:async (shopId) => {
+      requireMarketGM();
       const db = await loadAll(); const shop = db.shops?.[shopId]; if (!shop) return null;
       const result = await runNpcTraffic(shop, 1, calendarTimestamp()); await saveAll(db); return result;
     },
     restockNow:async (shopId) => {
+      requireMarketGM();
       const db = await loadAll(); const shop = db.shops?.[shopId]; if (!shop) return null;
       await restockDynamicShop(shop, {defaults:db.defaults, now:calendarTimestamp()}); if (getSimpleCalendar()) scheduleNextRestock(shop, calendarTimestamp()); await saveAll(db); return shop;
     }

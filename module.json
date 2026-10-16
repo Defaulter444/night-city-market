@@ -2,7 +2,7 @@
   "id": "night-city-market",
   "title": "StreetLife — Найт-Сити",
   "description": "Единое окно торговли, быстрые торговые точки и размещение на карте. Русская сборка для Cyberpunk RED.",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "compatibility": {
     "minimum": "12",
     "verified": "12.331",
@@ -86,7 +86,7 @@
   },
   "url": "https://github.com/Defaulter444/night-city-market",
   "manifest": "https://github.com/Defaulter444/night-city-market/releases/latest/download/module.json",
-  "download": "https://github.com/Defaulter444/night-city-market/releases/download/v0.3.1/night-city-market.zip",
+  "download": "https://github.com/Defaulter444/night-city-market/releases/download/v0.3.2/night-city-market.zip",
   "readme": "https://github.com/Defaulter444/night-city-market/blob/main/README.md",
   "changelog": "https://github.com/Defaulter444/night-city-market/blob/main/CHANGELOG.md",
   "bugs": "https://github.com/Defaulter444/night-city-market/issues"

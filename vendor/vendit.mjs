@@ -1,4 +1,4 @@
-import {componentSocket, componentHooks, transaction, onceTransaction, requireCustomer, requireProximity, fixerRank, foodTierId, housingItem, textName, lifestyleItem, intrinsicAttack, kindLabel, saleBlocked, fitDialog} from "../scripts/core.mjs";
+import {componentSocket, componentHooks, transaction, onceTransaction, requireCustomer, requireProximity, fixerRank, foodTierId, housingItem, textName, lifestyleItem, intrinsicAttack, kindLabel, saleBlocked, fitDialog, requireMarketGM} from "../scripts/core.mjs";
 const marketSocket=componentSocket("vendit");
 /***** Vendit™ Persistent Shops Module (v1.2.5; converted from macro v3.0.3)
  * UI: Player "Buy" button narrower (no flex-grow)
@@ -154,7 +154,7 @@ async function loadAll(){
   const val = await game.settings.get(STORE_NS, STORE_KEY);
   return normalizeDB(val);
 }
-async function saveAll(db){ return game.settings.set(STORE_NS, STORE_KEY, normalizeDB(db)); }
+async function saveAll(db){ requireMarketGM(); return game.settings.set(STORE_NS, STORE_KEY, normalizeDB(db)); }
 
 /* -------------------- GM socket writes stock for players -------------------- */
 let socketBound = false;
@@ -1081,6 +1081,7 @@ function saleDirectionText(factor){
   return "обычная рыночная цена";
 }
 async function postCitiNetSale(shop, item, {requireActiveScene=true}={}){
+  requireMarketGM();
   const activeScene = activeSceneDocument();
   if (requireActiveScene && (!activeScene || shop?.sceneId !== activeScene.id)){
     console.debug(`Vendit™ | Suppressed CitiNet ping for non-active scene: ${shop?.sceneName || shop?.sceneId || "Неизвестная сцена"}`);
@@ -1108,6 +1109,7 @@ async function postCitiNetSale(shop, item, {requireActiveScene=true}={}){
   return true;
 }
 async function fireRandomSceneSale(db, now = calendarTimestamp()){
+  requireMarketGM();
   const sceneId = activeSceneId();
   if (!sceneId) return false;
   const eligible = shopsEligibleForSceneSale(db, sceneId);
@@ -1330,6 +1332,7 @@ function selectedTileDocuments(){
   return (canvas?.tiles?.controlled || []).map(tile => getTileDocument(tile)).filter(Boolean);
 }
 async function clearBoundTileFlag(shop){
+  requireMarketGM();
   if (!shop?.tileUuid) return false;
   try{
     const tile = await fromUuid(shop.tileUuid);
@@ -1341,6 +1344,7 @@ async function clearBoundTileFlag(shop){
   return true;
 }
 async function bindVenditToTile(shop, tileDoc, db=null){
+  requireMarketGM();
   const tile = getTileDocument(tileDoc);
   if (!tile) throw new Error("Тайл не выбран.");
 
@@ -1362,6 +1366,7 @@ async function bindVenditToTile(shop, tileDoc, db=null){
   return shop;
 }
 async function deleteVendit(db, id){
+  requireMarketGM();
   const shop = db.vendits?.[id];
   if (!shop) return false;
   await clearBoundTileFlag(shop);
@@ -1471,6 +1476,7 @@ async function addDocumentToPool(pool, doc){
   return true;
 }
 async function openDynamicConfig(venditId, externalDB=null){
+  requireMarketGM();
   const bodyId = `vendit-dynamic-${randomID()}`;
   const db = externalDB || await loadAll();
   const shop = db.vendits?.[venditId];
@@ -1698,6 +1704,7 @@ async function openDynamicConfig(venditId, externalDB=null){
   dlg.render(true);
 }
 async function openDynamicManager(externalDB=null){
+  requireMarketGM();
   const bodyId = `vendit-network-${randomID()}`;
   const db = externalDB || await loadAll();
   const accent = db.era2045 ? "#E64539" : "#00FFF7";
@@ -1761,6 +1768,7 @@ async function openDynamicManager(externalDB=null){
           await processCalendarTick({allowSalePing:false, forceStock:true}); ui.notifications.info("Обновление складов автоматов обработано."); return;
         }
         if (event.target.closest("[data-scene-sale]")){
+          requireMarketGM();
           const fresh = await loadAll();
           if (!await fireRandomSceneSale(fresh, calendarTimestamp())) return ui.notifications.warn("На активной сцене нет автомата с включёнными распродажами и действующим источником товаров.");
           await saveAll(fresh); return;
@@ -1784,6 +1792,7 @@ async function openDynamicManager(externalDB=null){
 
 /* -------------------- Options dialog -------------------- */
 async function openOptions(externalDB=null){
+  requireMarketGM();
   const bodyId = `vendit-options-${randomID()}`;
   const db = externalDB || await loadAll();
   const accent = db.era2045 ? "#E64539" : "#00FFF7";
@@ -1849,7 +1858,7 @@ async function openOptions(externalDB=null){
 
 /* -------------------- Admin UI -------------------- */
 async function openAdmin() {
-  if (!game.user.isGM) return ui.notifications.warn("Управление автоматами доступно только мастеру.");
+  requireMarketGM();
   const bodyId = `vendit-${randomID()}`;
   const sceneId = currentSceneId();
   const db = await loadAll();
@@ -1938,6 +1947,7 @@ async function openAdmin() {
       });
 
       async function editVendit(v=null){
+        requireMarketGM();
         const editorBodyId = `vendit-edit-${randomID()}`;
         const data = v ? foundry.utils.deepClone(v) : {
           id: randomID(), name: "Новый автомат", sceneOnly: true,
@@ -2371,6 +2381,7 @@ function exposeApi(){
     pingLocation:pingVenditLocation,
     run:openFromArgs,
     bindSelectedTile:async (venditId) => {
+      requireMarketGM();
       const db = await loadAll();
       const shop = db.vendits?.[venditId];
       const tiles = selectedTileDocuments();
@@ -2381,6 +2392,7 @@ function exposeApi(){
       return shop;
     },
     generate:async (venditId, replace=true) => {
+      requireMarketGM();
       const db = await loadAll();
       const shop = db.vendits?.[venditId];
       if (!shop) return null;

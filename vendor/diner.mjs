@@ -1,4 +1,4 @@
-import {componentSocket, componentHooks, transaction, onceTransaction, requireCustomer, requireProximity, fixerRank, foodTierId, housingItem, textName, lifestyleItem, intrinsicAttack, kindLabel, saleBlocked, fitDialog} from "../scripts/core.mjs";
+import {componentSocket, componentHooks, transaction, onceTransaction, requireCustomer, requireProximity, fixerRank, foodTierId, housingItem, textName, lifestyleItem, intrinsicAttack, kindLabel, saleBlocked, fitDialog, requireMarketGM} from "../scripts/core.mjs";
 const marketSocket=componentSocket("diner");
 const MODULE_ID = "night-city-market";
 const SETTING_DB = "dinerDb";
@@ -229,6 +229,7 @@ async function loadDB() {
 }
 
 async function saveDB(db) {
+  requireMarketGM();
   db._ver = DB_VERSION;
   return game.settings.set(MODULE_ID, SETTING_DB, duplicate(db));
 }
@@ -249,6 +250,7 @@ function loadMealLedger() {
 }
 
 async function saveMealLedger(ledger) {
+  requireMarketGM();
   ledger._ver = MEAL_LEDGER_VERSION;
   return game.settings.set(MODULE_ID, SETTING_MEAL_LEDGER, duplicate(ledger));
 }
@@ -531,6 +533,7 @@ async function rollbackCoveredReservation(reservation) {
 }
 
 async function resetCoveredOrders(actor) {
+  requireMarketGM();
   if (!actor) return;
   await withMealLedgerLock(async () => {
     const ledger = loadMealLedger();
@@ -543,6 +546,7 @@ async function resetCoveredOrders(actor) {
 }
 
 async function clearCoveredServingLocks(actor) {
+  requireMarketGM();
   const lockedItems = actor?.items?.filter?.((item) => item.flags?.[MODULE_ID]?.coveredServing === true) ?? [];
   for (const item of lockedItems) {
     await item.unsetFlag(MODULE_ID, "coveredServing");
@@ -687,7 +691,7 @@ function buildDinerCreatedItemData(values = {}) {
 }
 
 async function createWorldMenuItem(values = {}) {
-  if (!game.user?.isGM) throw new Error("Создавать блюда и напитки может только мастер.");
+  requireMarketGM();
   const folder = await getOrCreateMenuItemFolder();
   const data = buildDinerCreatedItemData(values);
   const effectTemplateKeys = values.type === "gear" ? [] : [...new Set(values.effectTemplateKeys ?? [])].filter(Boolean);
@@ -899,7 +903,7 @@ async function browseForDinerImage(root) {
 }
 
 async function openCreateMenuItem({ diner, db, categoryId = null, onCreated = null } = {}) {
-  if (!game.user?.isGM) return;
+  requireMarketGM();
   const selectedCategory = categoryId || diner?.categories?.[0]?.id || "";
   const categoryOptions = (diner?.categories ?? []).map(category => ({ value: category.id, label: category.label }));
   const effectTemplates = await collectActiveEffectTemplates(diner);
@@ -1329,6 +1333,7 @@ async function rollCategoryItems(category) {
 }
 
 async function regenerateDinerMenu(diner) {
+  requireMarketGM();
   const manualItems = (diner.items ?? []).filter((item) => !item.generated);
   const generated = [];
 
@@ -1423,6 +1428,7 @@ function selectedTileDocuments() {
 }
 
 async function bindDinerToTile(diner, tileLike, db = null) {
+  requireMarketGM();
   const tile = getTileDocument(tileLike);
   if (!tile) throw new Error("Тайл не выбран.");
   const oldId = dinerIdFromTile(tile);
@@ -1439,6 +1445,7 @@ async function bindDinerToTile(diner, tileLike, db = null) {
 }
 
 async function unbindDinerFromTile(diner, tileLike) {
+  requireMarketGM();
   const tile = getTileDocument(tileLike);
   if (!tile) throw new Error("Тайл не выбран.");
   diner.tileUuids = (diner.tileUuids || []).filter(uuid => uuid !== tile.uuid);
@@ -1447,6 +1454,7 @@ async function unbindDinerFromTile(diner, tileLike) {
 }
 
 async function unbindDinerFromTileUuid(diner, tileUuid) {
+  requireMarketGM();
   const uuid = String(tileUuid || "");
   if (!uuid) return diner;
   diner.tileUuids = (diner.tileUuids || []).filter(candidate => candidate !== uuid);
@@ -1480,6 +1488,7 @@ async function boundTileInfo(diner) {
 
 
 async function refreshDinerTileFlags(diner, oldId, newId) {
+  requireMarketGM();
   if (!oldId || !newId || oldId === newId) return;
   for (const uuid of diner?.tileUuids || []) {
     try {
@@ -1492,6 +1501,7 @@ async function refreshDinerTileFlags(diner, oldId, newId) {
 }
 
 async function clearDinerTileBindings(diner) {
+  requireMarketGM();
   for (const uuid of diner?.tileUuids || []) {
     try {
       const tile = await fromUuid(uuid);
@@ -1613,7 +1623,7 @@ async function confirmDialog(title, content) {
 }
 
 async function openLifestyleOverride(actor = getActorFromContext()) {
-  if (!game.user.isGM) return ui.notifications.warn("Изменять уровень питания может только мастер.");
+  requireMarketGM();
   if (!actor) return ui.notifications.warn("Сначала выделите токен или назначьте персонажа пользователю.");
 
   const db = await loadDB();
@@ -1653,6 +1663,7 @@ async function openLifestyleOverride(actor = getActorFromContext()) {
       save: {
         label: "Сохранить",
         callback: async (html) => {
+          requireMarketGM();
           const value = html[0].querySelector(".diner-tier-override")?.value ?? "auto";
           if (value === "auto") await actor.unsetFlag(MODULE_ID, "foodTier");
           else await actor.setFlag(MODULE_ID, "foodTier", value);
@@ -1703,7 +1714,7 @@ function renderManagerList(db) {
 }
 
 async function openManager() {
-  if (!game.user.isGM) return ui.notifications.warn("Управление заведениями доступно только мастеру.");
+  requireMarketGM();
   const db = await loadDB();
   const accent = themeAccent(db);
 
@@ -1794,7 +1805,7 @@ async function openManager() {
 }
 
 async function openOptions({ db = null, parentRefresh = null } = {}) {
-  if (!game.user.isGM) return;
+  requireMarketGM();
   db ??= await loadDB();
   const defaults = db.defaults ?? defaultDB().defaults;
   const content = `
@@ -1920,7 +1931,7 @@ function renderItemEditors(diner) {
 }
 
 async function openDinerEditor(dinerId, { parentRefresh = null, sharedDb = null } = {}) {
-  if (!game.user.isGM) return;
+  requireMarketGM();
   const db = sharedDb ?? await loadDB();
   const diner = db.diners[dinerId];
   if (!diner) return ui.notifications.warn(`Заведение не найдено: ${dinerId}`);
