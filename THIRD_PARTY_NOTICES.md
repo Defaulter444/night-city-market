@@ -18,3 +18,7 @@ Choom Trade использует изображение рукопожатия �
 Остальные уведомления об изображениях, предоставленные исходными проектами, сохранены рядом с ресурсами и в исходных README. Системные изображения Cyberpunk RED не копируются в модуль: используются пути к установленной системе.
 
 This is unofficial homebrew content for use with Cyberpunk RED. The upstream projects state that they are provided free of charge under the R. Talsorian Games Homebrew Content Policy and are not approved or endorsed by RTG. Cyberpunk RED and related properties belong to R. Talsorian Games and their respective licensees.
+
+## Night City · Interactive Map
+
+Ночные рынки 0.4.0 (разделы по Корке, часы работы, вход по репутации и рекомендации фиксера, списки названий рынков и фиксеров) адаптированы с разрешения автора из модуля **Night City · Interactive Map** 0.21.0, автор Verlierboy ([Circle of Masters](https://t.me/circleofdms)): https://github.com/samroaleksej-bit/night-city-map. У репозитория-источника нет отдельного файла лицензии; разрешение на адаптацию получено владельцем модуля.

@@ -4,7 +4,10 @@ import '../vendor/trade.mjs';
 import '../vendor/bodega.mjs';
 import {DEPARTMENTS,readDepartment,getPoint,canVisit,buy,sell,quoteOrder} from './commerce.mjs';
 import {eligibleItems,itemAmount,bundleItemIds} from '../vendor/trade-rules.mjs';
-import {PRESETS,preparePoint,createPoint,startPlacement,cancelPlacement,bindNativeMarkers,bindMapOpen,scheduleRefill,refill,setRestock,updateProduct,addProduct,expandAssortment} from './quick-points.mjs';
+import {PRESETS,preparePoint,createPoint,startPlacement,cancelPlacement,bindNativeMarkers,bindMapOpen,scheduleRefill,refill,setRestock,updateProduct,addProduct,expandAssortment,updateNightMarket} from './quick-points.mjs';
+import {NIGHT_SECTIONS} from './point-model.mjs';
+import {nightAccess,marketHour,reputationOf,isNightHour} from './night-market.mjs';
+const nightSections=shop=>(shop.nightMarket?.sections??[]).map(s=>NIGHT_SECTIONS[s]?.label).filter(Boolean).join(' · ');
 const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const money=n=>`${Number(n||0).toLocaleString('ru-RU')} €$`;
 const icon=n=>`<i class="fas fa-${n}" aria-hidden="true"></i>`;
@@ -38,9 +41,12 @@ class MarketWindow extends Application {
     const pointSelector=`<div class="sl-point-switch"><label>${spec.title}<select name="pointSelect" aria-label="Торговая точка">${options(points.map(p=>[p.id,p.name]),shop?.id)}</select></label>${gm?'<label class="ncm-check"><input type="checkbox" name="onlyScene" '+(this.onlyScene?'checked':'')+'> На текущей сцене</label><button type="button" data-tab="quick">'+icon('plus')+' Создать точку</button>':''}</div>`;
     if(!shop)return `<section class="sl-store">${pointSelector}<div class="ncm-empty"><div>${icon(spec.icon)}<h2>Здесь начинается улица</h2><p>${gm?'Выберите готовый набор и разместите торговую точку щелчком на карте.':'Здесь появятся доступные на сцене магазины и заведения.'}</p>${gm?'<button type="button" class="primary" data-tab="quick">Создать точку</button>':''}</div></div></section>`;
 
+    const night=shop.nightMarket?nightAccess(shop,this.buyer,{isGM:gm,hour:marketHour()}):null;
+    if(night&&!night.open)return `<section class="sl-store">${pointSelector}<div class="sl-store-hero ncm-night-hero" style="background-image:url(&quot;${esc(art(part))}&quot;)"><div><small>Ночной рынок / ${esc(shop.sceneName||'Найт-Сити')}</small><h1>${esc(shop.name)}</h1><p>${esc(nightSections(shop))}</p></div></div><div class="ncm-night-lock">${icon(night.referral?'handshake':'moon')}<h2>${night.referral?'Вход по рекомендации':'Рынок свёрнут'}</h2><p>${esc(night.reason)}</p>${night.referral&&this.buyer?'<button type="button" data-action="night-request">'+icon('handshake')+' Попросить рекомендацию у фиксера</button>':''}</div></section>`;
     const rows=[],categories=new Set();let hint='';
     if(part==='diner'&&this.buyer){const l=game.dinerManager.inspectLifestyle(this.buyer);hint=`Рацион: ${l.foodTier?.label||l.foodTier?.name||'не указан'}`;}
     else hint=shop.quick?.restock?'Запасы пополняются при смене игрового дня':'Ассортимент и цены заведения';
+    if(night)hint=`Ночной рынок · ${nightSections(shop)} · ${gm?`вход: репутация ${shop.nightMarket.rep}+ или рекомендация (${shop.nightMarket.fixer}) · ${night.night?'сейчас открыт':'днём закрыт для игроков'}`:'открыт до 6:00'}`;
     if(this.mode==='sell'&&part==='bodega'&&this.buyer){
       for(const item of this.buyer.items){if(saleBlocked(item,this.buyer))continue;const q=await game.bodega.quoteSell(shop,item,this.buyer,db,1);if(!q)continue;
         rows.push(`<article class="ncm-product" data-search="${esc(item.name.toLocaleLowerCase('ru'))}" data-sell-row data-market="${q.market}" data-pct="${q.pct}" data-size="${q.size}">${picture(item.img,item.name)}<div class="ncm-product-name"><strong>${esc(item.name)}</strong><small>${q.verified?'Цена скупки за единицу':'Цену подтвердит Мастер'}</small></div><label class="ncm-quantity">Кол-во<input type="number" name="qty" min="1" max="${itemAmount(item)}" value="1" step="1" aria-label="Количество ${esc(item.name)}"></label><strong class="ncm-price" data-sale-total>${money(q.total)}</strong><button type="button" data-sell="${item.id}" ${!game.users.activeGM?'disabled':''}>${q.verified?'Продать':'Мастеру'}</button></article>`);
@@ -57,7 +63,7 @@ class MarketWindow extends Application {
       }
     }
     const cover=shop.img&& !/icons\/|koff-popper|assets\/(?:bodega|Vendit)/i.test(shop.img)?shop.img:art(part);
-    return `<section class="sl-store">${pointSelector}<div class="sl-store-hero" style="background-image:url(&quot;${esc(cover)}&quot;)"><div><small>${esc(spec.title)} / ${esc(shop.sceneName||'Найт-Сити')}</small><h1>${esc(shop.name)}</h1><p>${esc(hint)}</p></div>${gm?'<button type="button" data-action="advanced">'+icon('sliders')+' Настроить точку</button>':''}</div><div class="sl-store-columns"><section class="ncm-detail"><div class="ncm-toolbar"><label class="ncm-search">${icon('magnifying-glass')}<input type="search" name="search" value="${esc(this.query)}" placeholder="Найти товар" aria-label="Найти товар"></label>${part==='bodega'?`<div class="ncm-modes"><button type="button" data-mode="buy" class="${this.mode==='buy'?'active':''}">Купить</button><button type="button" data-mode="sell" class="${this.mode==='sell'?'active':''}">Продать</button></div>`:''}</div>${this.mode!=='sell'?`<nav class="sl-filters" aria-label="Категории товаров"><button type="button" data-category-filter="" class="${!this.category?'active':''}">${icon('border-all')} Все товары</button>${[...categories].map(c=>`<button type="button" data-category-filter="${esc(c)}" class="${this.category===c?'active':''}">${esc(c)}</button>`).join('')}</nav>`:''}<div class="sl-list-heading"><span>ПРЕДМЕТ</span><span>КОЛИЧЕСТВО / ЦЕНА / ДЕЙСТВИЕ</span></div><div class="ncm-products">${rows.join('')||'<p class="ncm-muted">'+(this.mode==='sell'?'Нет подходящих для скупки предметов.':'В этой точке пока нет товаров.')+'</p>'}<p class="ncm-no-results" hidden>Ничего не найдено</p></div>${gm?'<div class="ncm-drop" data-drop>'+icon('plus')+' Перетащите предмет сюда, чтобы добавить товар</div>':''}</section>${this.mode!=='sell'?await shopAside(part,shop,this.buyer,this.inspected):'<aside class="sl-inspector"><section class="sl-panel"><h3>Скупка снаряжения</h3><p>В списке показаны доступные для продажи вещи. Для предметов без подтверждённой цены потребуется проверка Мастера.</p></section></aside>'}</div></section>`;
+    return `<section class="sl-store">${pointSelector}<div class="sl-store-hero" style="background-image:url(&quot;${esc(cover)}&quot;)"><div><small>${esc(spec.title)} / ${esc(shop.sceneName||'Найт-Сити')}</small><h1>${esc(shop.name)}</h1><p>${esc(hint)}</p></div>${gm&&shop.nightMarket?'<button type="button" class="ncm-night-access" data-action="night-referrals">'+icon('handshake')+' Вход и рекомендации</button>':''}${gm?'<button type="button" data-action="advanced">'+icon('sliders')+' Настроить точку</button>':''}</div><div class="sl-store-columns"><section class="ncm-detail"><div class="ncm-toolbar"><label class="ncm-search">${icon('magnifying-glass')}<input type="search" name="search" value="${esc(this.query)}" placeholder="Найти товар" aria-label="Найти товар"></label>${part==='bodega'?`<div class="ncm-modes"><button type="button" data-mode="buy" class="${this.mode==='buy'?'active':''}">Купить</button><button type="button" data-mode="sell" class="${this.mode==='sell'?'active':''}">Продать</button></div>`:''}</div>${this.mode!=='sell'?`<nav class="sl-filters" aria-label="Категории товаров"><button type="button" data-category-filter="" class="${!this.category?'active':''}">${icon('border-all')} Все товары</button>${[...categories].map(c=>`<button type="button" data-category-filter="${esc(c)}" class="${this.category===c?'active':''}">${esc(c)}</button>`).join('')}</nav>`:''}<div class="sl-list-heading"><span>ПРЕДМЕТ</span><span>КОЛИЧЕСТВО / ЦЕНА / ДЕЙСТВИЕ</span></div><div class="ncm-products">${rows.join('')||'<p class="ncm-muted">'+(this.mode==='sell'?'Нет подходящих для скупки предметов.':'В этой точке пока нет товаров.')+'</p>'}<p class="ncm-no-results" hidden>Ничего не найдено</p></div>${gm?'<div class="ncm-drop" data-drop>'+icon('plus')+' Перетащите предмет сюда, чтобы добавить товар</div>':''}</section>${this.mode!=='sell'?await shopAside(part,shop,this.buyer,this.inspected):'<aside class="sl-inspector"><section class="sl-panel"><h3>Скупка снаряжения</h3><p>В списке показаны доступные для продажи вещи. Для предметов без подтверждённой цены потребуется проверка Мастера.</p></section></aside>'}</div></section>`;
   }
 
   tradeContent(){
@@ -119,6 +125,11 @@ class MarketWindow extends Application {
   async action(action){
     if(action==='help'){if(!this.leaveEditor())return;this.tab='help';this.render(false);return;}
     if(action==='inventory'){this.buyer?.sheet?.render(true);return;}
+    if(action==='night-request'){
+      const shop=getPoint('bodega',this.selected.bodega),buyer=this.buyer;if(!shop?.nightMarket||!buyer)return;
+      await ChatMessage.create({content:`<p><b>${esc(buyer.name)}</b> просит ${esc(shop.nightMarket.fixer||'фиксера')} о рекомендации на Ночной рынок «${esc(shop.name)}» (репутация ${reputationOf(buyer)}).</p>`,whisper:ChatMessage.getWhisperRecipients('GM').map(u=>u.id),speaker:ChatMessage.getSpeaker({actor:buyer})});
+      ui.notifications.info('Просьба о рекомендации отправлена Мастеру.');return;
+    }
     if(!game.user.isGM)return ui.notifications.warn('Настройки и управление торговлей доступны только Мастеру.');
     if(action==='item-directory'){ui.sidebar.activateTab('items');ui.items.renderPopout();return;}
     if(action==='editor-cancel'){this.editing=false;this.message='Изменения отменены';this.render(false);return;}
@@ -129,6 +140,11 @@ class MarketWindow extends Application {
     const part=this.tab,shop=getPoint(part,this.selected[part]);if(!shop)return;
     if(action==='copy'){this.editing=false;this.quickPreset=shop.quick?.presetId||(part==='bodega'?'street':part);this.copySource=shop;this.tab='quick';this.render(false);}
     else if(action==='advanced'){this.editing=true;this.editorSection='main';this.render(false);}
+    else if(action==='night-referrals'&&shop.nightMarket){
+      const actors=game.actors.filter(a=>a.type==='character'&&game.users.some(u=>!u.isGM&&a.testUserPermission(u,'OWNER'))),m=shop.nightMarket;
+      const content=`<form class="ncm-night-form"><p>Разделы: ${esc(nightSections(shop))}. Рекомендацию даёт ${esc(m.fixer||'фиксер')}. Рынок открыт игрокам с 21:00 до 6:00${isNightHour(marketHour())?' — сейчас открыт':' — сейчас закрыт'}.</p><label>Репутация для входа <input type="number" name="rep" min="0" max="10" step="1" value="${m.rep}"></label><fieldset><legend>Пускать по рекомендации</legend>${actors.map(a=>`<label class="ncm-check"><input type="checkbox" name="ref" value="${a.id}" ${m.referrals?.includes(a.id)?'checked':''}> ${esc(a.name)} · репутация ${reputationOf(a)}</label>`).join('')||'<p>Нет персонажей игроков.</p>'}</fieldset></form>`;
+      new Dialog({title:`Ночной рынок «${shop.name}»`,content,buttons:{save:{icon:icon('check'),label:'Сохранить',callback:html=>{const form=html[0].querySelector('form');this.perform(()=>updateNightMarket(shop.id,{rep:Number(form.querySelector('[name="rep"]').value),referrals:[...form.querySelectorAll('[name="ref"]:checked')].map(i=>i.value)}),'Вход на рынок обновлён');}},cancel:{label:'Отмена'}},default:'save'}).render(true);
+    }
     else if(action==='legacy'){if(!this.leaveEditor())return;if(part==='diner')legacy.dinerEdit(shop.id);else legacy[part]();this.render(false);}
     else if(action==='locate'){this.perform(async()=>{const marker=await fromUuid(shop.tileUuid||shop.quick?.markerUuid||'');if(!marker)throw Error('У точки нет метки на карте.');if(marker.parent?.id!==canvas.scene?.id)await marker.parent.view();await this.minimize();canvas.animatePan({x:marker.x,y:marker.y,scale:1});},'Точка показана на карте');}
     else if(action==='add-category')this.perform(()=>addCategory(shop.id),'Категория добавлена');
@@ -175,5 +191,7 @@ Hooks.on('updateSetting',setting=>{if(setting.key?.startsWith(ID+'.'))refreshWin
 
 
 function updateClock(){app?.element?.find('[data-game-time]').text(clockText());}
-Hooks.on('updateWorldTime',updateClock);Hooks.on('simple-calendar-date-time-change',updateClock);
+// Ночной рынок открывается и закрывается по часам: при смене ночи/дня перерисовываем витрину.
+let lastNight=null;function nightTick(){const now=isNightHour(marketHour());if(lastNight!==null&&now!==lastNight)refreshWindow();lastNight=now;}
+Hooks.on('updateWorldTime',updateClock);Hooks.on('simple-calendar-date-time-change',updateClock);Hooks.on('updateWorldTime',nightTick);Hooks.on('simple-calendar-date-time-change',nightTick);
 Hooks.on('renderChatMessage',(_message,html)=>{if(html.find('.sl-chat-card,.ct-chat-card').length)html.addClass('sl-receipt');});

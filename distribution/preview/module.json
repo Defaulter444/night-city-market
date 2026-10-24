@@ -1,0 +1,97 @@
+{
+  "id": "night-city-market",
+  "title": "StreetLife — Найт-Сити",
+  "description": "Единое окно торговли, быстрые торговые точки и размещение на карте. Русская сборка для Cyberpunk RED.",
+  "version": "0.4.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12.331",
+    "maximum": "12"
+  },
+  "authors": [
+    {
+      "name": "Horusian",
+      "flags": {
+        "note": "Объединение и русская адаптация"
+      }
+    },
+    {
+      "name": "Lt Atlas",
+      "flags": {
+        "note": "Автор Choom Trade, Bodega, Diner Manager, Vendit"
+      }
+    },
+    {
+      "name": "Verlierboy",
+      "url": "https://t.me/circleofdms"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/choom-trade.css",
+    "styles/diner-manager.css",
+    "styles/market.css",
+    "styles/streetlife.css"
+  ],
+  "languages": [
+    {
+      "lang": "ru",
+      "name": "Русский",
+      "path": "lang/ru.json"
+    }
+  ],
+  "socket": true,
+  "relationships": {
+    "systems": [
+      {
+        "id": "cyberpunk-red-core",
+        "type": "system",
+        "compatibility": {
+          "minimum": "0.92.1",
+          "verified": "0.92.4"
+        }
+      }
+    ],
+    "recommends": [
+      {
+        "id": "foundryvtt-simple-calendar",
+        "type": "module",
+        "manifest": "https://github.com/vigoren/foundryvtt-simple-calendar/releases/download/v2.4.18/module.json",
+        "compatibility": {
+          "minimum": "2.4.18",
+          "verified": "2.4.18"
+        }
+      }
+    ],
+    "conflicts": [
+      {
+        "id": "choom-trade",
+        "type": "module",
+        "reason": "Эта функция уже включена в Найт-Сити — Торговля."
+      },
+      {
+        "id": "bodega",
+        "type": "module",
+        "reason": "Эта функция уже включена в Найт-Сити — Торговля."
+      },
+      {
+        "id": "diner-manager",
+        "type": "module",
+        "reason": "Эта функция уже включена в Найт-Сити — Торговля."
+      },
+      {
+        "id": "vendit",
+        "type": "module",
+        "reason": "Эта функция уже включена в Найт-Сити — Торговля."
+      }
+    ]
+  },
+  "url": "https://github.com/Defaulter444/night-city-market",
+  "manifest": "https://raw.githubusercontent.com/Defaulter444/night-city-market/refs/heads/claude/pensive-rubin-8opsg3/distribution/preview/module.json",
+  "download": "https://raw.githubusercontent.com/Defaulter444/night-city-market/refs/heads/claude/pensive-rubin-8opsg3/distribution/preview/night-city-market.zip",
+  "readme": "https://github.com/Defaulter444/night-city-market/blob/main/README.md",
+  "changelog": "https://github.com/Defaulter444/night-city-market/blob/main/CHANGELOG.md",
+  "bugs": "https://github.com/Defaulter444/night-city-market/issues"
+}

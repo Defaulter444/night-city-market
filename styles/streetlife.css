@@ -113,3 +113,13 @@
 .sl-receipt .message-header,.sl-receipt .message-header *{color:#a8c7d7!important;}
 
 .ncm-app .sl-stock-expand{display:flex;flex-wrap:wrap;align-items:end;gap:12px;padding:14px;margin:12px 0;border:1px solid #137680;background:#072024}.ncm-app .sl-stock-expand>div{flex:1;min-width:180px}.ncm-app .sl-stock-expand small{display:block;color:#acc1cd;margin-top:6px}.ncm-app .sl-stock-expand label{display:flex;flex-direction:column;gap:6px}.ncm-app .sl-stock-expand input{width:130px}.ncm-app .sl-stock-expand button{width:auto}.ncm-app .sl-stock-expand .sl-stock-expand-hint{flex-basis:100%}
+/* Ночной рынок: витрина закрыта днём или без репутации/рекомендации. */
+.ncm-app .ncm-night-hero{filter:saturate(.7) brightness(.75);}
+.ncm-app .ncm-night-lock{display:grid;justify-items:center;gap:10px;margin:22px auto;max-width:560px;padding:28px 24px;text-align:center;border:1px solid #6b4bd8;background:linear-gradient(180deg,#140d26e6,#07040fe6);box-shadow:0 0 24px #6b4bd840,inset 0 0 30px #6b4bd822;}
+.ncm-app .ncm-night-lock>i{font-size:38px;color:#b79bff;filter:drop-shadow(0 0 8px #8f6bff);}
+.ncm-app .ncm-night-lock h2{margin:0;border:0;font-size:22px;text-transform:uppercase;letter-spacing:.06em;color:#e9e1ff;}
+.ncm-app .ncm-night-lock p{margin:0;color:#c9bfe8;line-height:1.5;}
+.ncm-app .ncm-night-lock button{margin-top:6px;width:auto;padding:0 16px;border-color:#8f6bff;color:#e9e1ff;}
+.ncm-app .sl-store-hero>button.ncm-night-access{border-color:#8f6bff;}
+.ncm-night-form fieldset{display:grid;gap:4px;margin-top:8px;}
+.ncm-night-form label{display:flex;align-items:center;gap:8px;}

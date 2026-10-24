@@ -1,11 +1,12 @@
 import {ID,transaction} from './core.mjs';
-import {PRESETS,eligibleStock,pickStock,pointData,refillPoint,canvasPoint,stockCount,stockKey,appendStock} from './point-model.mjs';
+import {PRESETS,eligibleStock,pickStock,pointData,refillPoint,canvasPoint,stockCount,stockKey,appendStock,presetFor,nightPreset,rollNightSections} from './point-model.mjs';
+import {FIXERS,MARKET_NAMES} from './night-market.mjs';
 import {DEPARTMENTS,readDepartment,getPoint} from './commerce.mjs';
 import {currentWorldDayKey} from '../vendor/diner.mjs';
 export {PRESETS};
 function assertGM(){if(!game.user.isGM)throw Error('Размещение и настройка точек доступны Мастеру.');if(game.users.activeGM&&game.users.activeGM.id!==game.user.id)throw Error('Выполните действие с клиента основного Мастера.');}
-export async function suggestStock(presetId,{count,exclude=new Set()}={}){
-  assertGM();const preset=PRESETS[presetId];if(!preset)throw Error('Неизвестный шаблон.');
+export async function suggestStock(presetId,{count,exclude=new Set(),preset:override=null}={}){
+  assertGM();const preset=override??PRESETS[presetId];if(!preset)throw Error('Неизвестный шаблон.');
   const limit=stockCount(count,preset);
   const candidates=[...game.items].filter(item=>eligibleStock(item,preset));
   const packs=game.packs.filter(p=>p.documentName==='Item'&&(p.metadata.packageName==='cyberpunk-red-core'||/^cpr-|cyberpunk-red/.test(p.metadata.packageName??'')));
@@ -38,12 +39,17 @@ export async function preparePoint({presetId,name,restock=true,sourceId=null,emp
   assertGM();const preset=PRESETS[presetId];if(!preset)throw Error('Шаблон не найден.');
   const source=sourceId?getPoint(preset.part,sourceId):null;
   if(sourceId&&!source)throw Error('Точка для копирования больше не существует.');
-  const limit=stockCount(count??source?.quick?.stockCount,preset),items=source||empty?[]:await suggestStock(presetId,{count:limit});
+  const pick=list=>list[Math.floor(Math.random()*list.length)];
+  // Ночной рынок: разделы к6 дважды, порог репутации 2–7 и фиксер, который даёт рекомендацию.
+  const night=presetId==='night'&&!source?{sections:rollNightSections(),rep:2+Math.floor(Math.random()*6),fixer:pick(FIXERS)}:null;
+  const stockPreset=night?nightPreset(night.sections):source?.nightMarket?nightPreset(source.nightMarket.sections):preset;
+  const limit=stockCount(count??source?.quick?.stockCount,preset),items=source||empty?[]:await suggestStock(presetId,{count:limit,preset:stockPreset});
   if(!source&&!empty&&!items.length)throw Error('Подходящих предметов не найдено. Выберите пустую точку и перетащите в неё товары.');
-  return {presetId,name:String(name||source?.name||preset.label).trim().slice(0,100),restock:!!restock,source,items,count:limit};
+  const label=night&&(!name||name===preset.label)?pick(MARKET_NAMES):name||source?.name||preset.label;
+  return {presetId,name:String(label).trim().slice(0,100),restock:!!restock,source,items,count:limit,night};
 }
 export async function expandAssortment(part,id,{count}={}){
-  assertGM();const snapshot=getPoint(part,id),presetId=snapshot?.quick?.presetId,preset=PRESETS[presetId];
+  assertGM();const snapshot=getPoint(part,id),presetId=snapshot?.quick?.presetId,preset=presetFor(snapshot);
   if(!preset||preset.part!==part)throw Error('Автоподбор доступен для точек, созданных из шаблона.');
   const limit=stockCount(count,preset),knownKeys=new Map(),exclude=new Set();
   for(const item of snapshot.items??[]){
@@ -53,7 +59,7 @@ export async function expandAssortment(part,id,{count}={}){
     if(key){exclude.add(key);knownKeys.set(item.uuid,key);}
   }
   const missing=Math.max(0,limit-(snapshot.items?.length||0));
-  const docs=missing?await suggestStock(presetId,{count:missing,exclude}):[];
+  const docs=missing?await suggestStock(presetId,{count:missing,exclude,preset}):[];
   return transaction(async()=>{
     assertGM();const spec=DEPARTMENTS[part],db=readDepartment(part),point=db[spec.collection]?.[id];
     if(!point||point.quick?.presetId!==presetId)throw Error('Точка изменилась. Откройте её заново.');
@@ -109,6 +115,13 @@ export function startPlacement(prepared,{repeat=false,onPlaced=()=>{},onEnd=()=>
 }
 export async function refill(part,id,{force=true}={}){
   assertGM();return transaction(async()=>{assertGM();const spec=DEPARTMENTS[part],db=readDepartment(part),point=db[spec.collection]?.[id];if(!point?.quick)throw Error('Для этой точки настройте поставки в дополнительных параметрах.');if(refillPoint(point,currentWorldDayKey(),{force}))await game.settings.set(ID,spec.key,db);});
+}
+/** Порог репутации и персонажи с рекомендацией фиксера для Ночного рынка. */
+export async function updateNightMarket(id,{rep,referrals}={}){
+  assertGM();return transaction(async()=>{assertGM();const spec=DEPARTMENTS.bodega,db=readDepartment('bodega'),point=db[spec.collection]?.[id];if(!point?.nightMarket)throw Error('Это не Ночной рынок.');
+    if(rep!==undefined){const value=Number(rep);if(!Number.isInteger(value)||value<0||value>10)throw Error('Репутация — целое число от 0 до 10.');point.nightMarket.rep=value;}
+    if(referrals!==undefined)point.nightMarket.referrals=[...new Set((referrals??[]).filter(id=>typeof id==='string'&&game.actors.get(id)))].slice(0,64);
+    await game.settings.set(ID,spec.key,db);Hooks.callAll('nightCityMarketChanged');});
 }
 export async function setRestock(part,id,enabled){
   assertGM();return transaction(async()=>{assertGM();const spec=DEPARTMENTS[part],db=readDepartment(part),point=db[spec.collection]?.[id];if(!point?.quick)throw Error('Быстрая точка не найдена.');point.quick.restock=!!enabled;point.quick.dayKey=currentWorldDayKey();await game.settings.set(ID,spec.key,db);});
